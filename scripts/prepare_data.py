@@ -65,7 +65,18 @@ def parse_args():
                    help="Keep only complaints received in the last N years")
     p.add_argument("--since", type=str, default=None,
                    help="Override --years with an explicit YYYY-MM-DD cutoff")
+    p.add_argument("--include-credit-reporting", action="store_true",
+                   help="Keep credit-reporting complaints (vs Equifax / Experian / "
+                        "TransUnion). Default excludes them since they dominate the "
+                        "dataset (~85%) and aren't banking complaints.")
     return p.parse_args()
+
+
+CREDIT_REPORTING_PRODUCTS = {
+    "Credit reporting or other personal consumer reports",
+    "Credit reporting, credit repair services, or other personal consumer reports",
+    "Credit reporting",
+}
 
 
 def main():
@@ -96,7 +107,12 @@ def main():
     )
 
     df = df[df["date_received"] >= cutoff].copy()
-    print(f"  filtered: {len(df):,} rows")
+    print(f"  after date filter: {len(df):,} rows")
+
+    if not args.include_credit_reporting:
+        before = len(df)
+        df = df[~df["product"].isin(CREDIT_REPORTING_PRODUCTS)].copy()
+        print(f"  after dropping credit-reporting: {len(df):,} rows ({before - len(df):,} removed)")
 
     # Cast small categorical fields for parquet compactness
     for col in [
