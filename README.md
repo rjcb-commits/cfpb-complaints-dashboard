@@ -1,22 +1,27 @@
 # CFPB Consumer Complaints Dashboard
 
-A Tableau dashboard built on the public CFPB Consumer Complaint Database. Surfaces the products, issues, and companies driving consumer financial complaints from 2012 to present.
+A Tableau dashboard on five years of CFPB consumer complaint data. Surfaces a structural gap in monetary relief rates between P2P / money-transfer disputes and card disputes, and the company-level pattern that drives it.
 
-**Live dashboard:** _coming soon (Tableau Public)_
+**Live dashboard:** [public.tableau.com/app/profile/raymond.jack6785/viz/CFPBP2PResolutionGap](https://public.tableau.com/app/profile/raymond.jack6785/viz/CFPBP2PResolutionGap/CFPBP2PComplaints)
 
-## What it shows
+## The finding
 
-Every consumer complaint filed against a US bank since 2012, sliced by:
+P2P / money-transfer disputes close with monetary relief just 4.96% of the time. Credit card disputes resolve at 14.5%, debit at 18.0%, prepaid at 23.0%. The gap has held for the full five-year window and is dominated at the bottom by P2P-native platforms (Block / Cash App, Early Warning Services / Zelle, Robinhood) that resolve almost zero complaints with monetary relief.
 
-- Trends over time, with drill-down by product (Credit card, Mortgage, EFT, etc.)
-- Top complaint issues across the industry, filterable by company
-- State-level complaint rates (per capita, not raw counts)
-- Resolution outcomes — what fraction of complaints close with monetary relief vs explanation only
-- Timely-response rates by company
+The Q1 2025 spike in P2P volume (13x normal) followed CFPB's $175M enforcement against Block. Block closed 99% of those complaints with explanation only. Macro restitution and individual relief outcomes moved in opposite directions.
+
+## What's in the dashboard
+
+Single screen, four panels:
+
+- Headline callout with the 4.96% number and a key-takeaway summary
+- Monetary relief rate by product (horizontal bar, P2P highlighted in red)
+- Monetary relief rate trend (quarterly line, five-year window, P2P highlighted in red, end-of-line labels)
+- Top 10 P2P companies by complaint volume vs relief rate (scatter, dot size = volume, zero-relief outliers in red, inline annotation on Block)
 
 ## Why this dataset
 
-I work consumer dispute analytics at a top-10 US bank. The bank-internal disputes I handle are the volume that *doesn't* escalate to the CFPB. This dashboard surfaces what does — the products and complaint types that drive regulatory escalation, and how outcomes vary by company. Electronic-fund-transfer complaints have grown sharply since 2018, which is the trend behind why Reg-E modeling work has gotten more attention industry-wide.
+I work consumer dispute analytics at a top-10 US bank. The bank-internal disputes I handle are the volume that *doesn't* escalate to the CFPB. This dashboard surfaces what does, focused on the payment-product categories my Reg-E modeling work actually touches. Building it on public data lets me show the analytical thinking I apply at work without exposing anything internal.
 
 ## Stack
 
