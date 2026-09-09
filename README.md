@@ -1,14 +1,16 @@
 # CFPB Consumer Complaints Dashboard
 
-A Tableau dashboard on five years of CFPB consumer complaint data. Surfaces a structural gap in monetary relief rates between P2P / money-transfer disputes and card disputes, and the company-level pattern that drives it.
+A Tableau dashboard comparing recorded monetary-relief outcomes across selected payment-product categories in the CFPB Consumer Complaint Database, covering April 2021 through December 2025.
 
 **Live dashboard:** [public.tableau.com/app/profile/raymond.jack6785/viz/CFPBP2PResolutionGap](https://public.tableau.com/app/profile/raymond.jack6785/viz/CFPBP2PResolutionGap/CFPBP2PComplaints)
 
 ## The finding
 
-P2P / money-transfer disputes close with monetary relief just 4.96% of the time. Credit card disputes resolve at 14.5%, debit at 18.0%, prepaid at 23.0%. The gap has held for the full five-year window and is dominated at the bottom by P2P-native platforms (Block / Cash App, Early Warning Services / Zelle, Robinhood) that resolve almost zero complaints with monetary relief.
+In the analyzed records, P2P / money-transfer complaints closed with monetary relief at a rate of 4.96%, compared with 14.52% for the credit-card group, 18.01% for the debit-labelled group, and 22.95% for prepaid.
 
-The Q1 2025 spike in P2P volume (13x normal) followed CFPB's $175M enforcement against Block. Block closed 99% of those complaints with explanation only. Macro restitution and individual relief outcomes moved in opposite directions.
+Q1 2025 accounted for 42.8% of the P2P / money-transfer complaint total. Excluding that quarter, the group's monetary-relief rate was 8.07%. Complaint volume rose from 4,597 in Q4 2024 to 58,903 in Q1 2025, while recorded monetary-relief outcomes rose from 386 to 488.
+
+These are outcomes recorded in CFPB complaints, not a measure of all consumer reimbursement or proof of a regulatory or operational cause. Category definitions and reporting coverage differ: the debit-labelled group includes a checking-account charge-issue category, historical combined credit-card/prepaid records are assigned to credit, and standalone prepaid coverage begins in Q3 2023.
 
 ## What's in the dashboard
 
@@ -17,11 +19,11 @@ Single screen, four panels:
 - Headline callout with the 4.96% number and a key-takeaway summary
 - Monetary relief rate by product (horizontal bar, P2P highlighted in red)
 - Monetary relief rate trend (quarterly line, five-year window, P2P highlighted in red, end-of-line labels)
-- Top 10 P2P companies by complaint volume vs relief rate (scatter, dot size = volume, zero-relief outliers in red, inline annotation on Block)
+- Top 10 P2P companies by complaint volume vs relief rate (scatter, dot size = volume, companies with near-zero recorded monetary-relief rates in red, inline annotation on Block)
 
 ## Why this dataset
 
-I work consumer dispute analytics at a top-10 US bank. The bank-internal disputes I handle are the volume that *doesn't* escalate to the CFPB. This dashboard surfaces what does, focused on the payment-product categories my Reg-E modeling work actually touches. Building it on public data lets me show the analytical thinking I apply at work without exposing anything internal.
+I work in consumer dispute analytics. This project uses public CFPB data to explore complaint outcomes across payment-product categories without using employer data or materials.
 
 ## Stack
 
@@ -46,21 +48,32 @@ The CFPB publishes the full dataset as a single CSV. Download once:
 3. Direct: https://files.consumerfinance.gov/ccdb/complaints.csv.zip
 4. Unzip; place `complaints.csv` in `data/`
 
-The raw file is ~3 GB uncompressed, ~5M rows. The prep script slims it down to the columns and time window the dashboard needs.
+The published source grows over time; the current uncompressed size and row count depend on when you download it. The prep script slims the raw file to the columns and time window the dashboard needs.
 
 ## Prep the data for Tableau
 
 ```bash
 python scripts/prepare_data.py --years 5
+python scripts/prepare_data.py --since 2021-04-01  # or an explicit cutoff
 ```
 
-Reads `data/complaints.csv`, filters to the last `--years` years (default 5), drops unused columns, fixes date types, and writes `prepared/complaints.parquet` (smaller and faster than CSV for Tableau).
+Reads `data/complaints.csv`, filters by either a rolling window (`--years`, default 5) or an explicit cutoff (`--since YYYY-MM-DD`), drops unused columns, fixes date types, and writes `prepared/complaints.parquet`. Credit-reporting complaints are excluded by default; add `--include-credit-reporting` to keep them.
 
 ## Build the dashboard
 
-Open Tableau Public Desktop, connect to `prepared/complaints.parquet`, and build the dashboard. See `tableau/notes.md` for the panel structure and design notes.
+Open Tableau Public Desktop, connect to `prepared/complaints.parquet`, and build. The published version is linked at the top of this README.
 
-When done, publish to Tableau Public and replace the "coming soon" link in this README with the public URL.
+## Reproducing the published analysis
+
+The published dashboard was built on a snapshot covering **April 2021 through December 2025**, with credit-reporting complaints excluded. Product mappings and the outcome definition used in the published workbook:
+
+- **P2P / money transfer** = CFPB product `Money transfer, virtual currency, or money service`
+- **Credit card** = `Credit card` combined with the historical `Credit card or prepaid card` dual-label category
+- **Debit card / unauthorized** = subset of `Checking or savings account` filtered to debit/ATM issue codes
+- **Prepaid card** = CFPB product `Prepaid card`
+- **Monetary relief** = `company_response == "Closed with monetary relief"`
+
+To recreate the published analysis period from a newer raw file, run `python scripts/prepare_data.py --since 2021-04-01` and then filter to `date_received <= 2025-12-31` inside Tableau. A rolling `--years 5` at a later date will not reproduce the same window. The exact snapshot used to publish the dashboard is not committed here.
 
 ## Project layout
 
@@ -69,11 +82,6 @@ data/                   raw CSV (gitignored)
 prepared/               aggregated/cleaned files for Tableau (gitignored)
 scripts/
   prepare_data.py       slims raw CSV into Tableau-ready parquet
-notebooks/
-  01_explore.ipynb      EDA on the raw data
-tableau/
-  notes.md              dashboard panel design notes
-  *.twbx                packaged workbook (committed once stable)
 ```
 
 ## License
